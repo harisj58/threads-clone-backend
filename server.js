@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import connectDB from "./db/connectDB.js";
 import cookieParser from "cookie-parser";
 import userRoutes from "./routes/userRoutes.js";
+import postRoutes from "./routes/postRoutes.js";
 
 // dotenv allows us to use the process.env variables in our app
 dotenv.config();
@@ -23,6 +24,7 @@ app.use(cookieParser());
 
 // Routes
 app.use("/api/users/", userRoutes); // user routes
+app.use("/api/posts/", postRoutes);
 
 // Initialize the express app to listen on PORT port
 app.listen(PORT, () =>
