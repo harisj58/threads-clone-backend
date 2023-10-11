@@ -11,7 +11,7 @@ const protectRoute = async (req, res, next) => {
     // if token is absent
     if (!token) {
       // user is unauthorized
-      res.status(401).json({ message: "Unauthorized user" });
+      return res.status(401).json({ message: "Unauthorized user" });
     }
 
     // decode and verify the token using our secret
