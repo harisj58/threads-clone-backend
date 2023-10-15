@@ -27,6 +27,8 @@ const signupUser = async (req, res) => {
       email,
       username,
       password: hashedPassword,
+      bio: "",
+      profilePic: "",
     });
     // await the addition of user inside the database
     await newUser.save();
@@ -89,6 +91,8 @@ const loginUser = async (req, res) => {
       name: user.name,
       email: user.email,
       username: user.username,
+      bio: user.bio,
+      profilePic: user.profilePic,
     });
   } catch (err) {
     // catch any errors that show up
