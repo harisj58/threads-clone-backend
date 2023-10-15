@@ -12,7 +12,7 @@ const createPost = async (req, res) => {
       // indicate failure as they are necessary for posting
       return res
         .status(400)
-        .json({ message: "Insufficient data to create a post" });
+        .json({ error: "Insufficient data to create a post" });
     }
 
     // get user details by searching using his ID
@@ -22,14 +22,14 @@ const createPost = async (req, res) => {
     // if no such user is found
     if (!user) {
       // indicate failure in response
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ error: "User not found" });
     }
 
     // if the posting user ID does not match the ID of current logged in user
     if (user._id.toString() !== req.user._id.toString()) {
       // indicate failure in response as user cannot post on someone else's
       // behalf
-      return res.status(401).json({ message: "Unauthorized to create a post" });
+      return res.status(401).json({ error: "Unauthorized to create a post" });
     }
 
     // define max length for post as per post schema
@@ -39,7 +39,7 @@ const createPost = async (req, res) => {
       // indicate failure in response
       return res
         .status(400)
-        .json({ message: `Text must be less than ${maxLength} characters` });
+        .json({ error: `Text must be less than ${maxLength} characters` });
     }
 
     // create a new post using the details
@@ -57,7 +57,7 @@ const createPost = async (req, res) => {
       .status(201)
       .json({ message: "Post created successfully", newPost });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: err.message });
     console.log("Error creating a post: ", err.message);
   }
 };
@@ -71,13 +71,13 @@ const getPost = async (req, res) => {
     // if no such post exists
     if (!post) {
       // indicate failure in response
-      return res.status(404).json({ message: "Post not found" });
+      return res.status(404).json({ error: "Post not found" });
     }
 
     // indicate success in response
     return res.status(200).json({ message: "Post found", post });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: err.message });
     console.log("Error getting post: ", err.message);
   }
 };
@@ -91,13 +91,13 @@ const deletePost = async (req, res) => {
     // if no such post exists
     if (!post) {
       // indicate failure in response
-      return res.status(404).json({ message: "Post not found" });
+      return res.status(404).json({ error: "Post not found" });
     }
 
     // if the current user ID does not match the ID of the post creator
     if (post.postedBy.toString() !== req.user._id.toString()) {
       // indicate failure as a user may not delete someone else's post
-      return res.status(400).json({ message: "Unauthorized to delete post" });
+      return res.status(400).json({ error: "Unauthorized to delete post" });
     }
 
     // await deletion of post using post ID
@@ -106,7 +106,7 @@ const deletePost = async (req, res) => {
     // indicate success in response
     return res.status(200).json({ message: "Post deleted successfully" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: err.message });
     console.log("Error deleting post: ", err.message);
   }
 };
@@ -125,7 +125,7 @@ const likeUnlikePost = async (req, res) => {
     // if no such post exists
     if (!post) {
       // indicate failure in response
-      return res.status(404).json({ message: "Post not found" });
+      return res.status(404).json({ error: "Post not found" });
     }
 
     // check if user has already liked the post
@@ -142,7 +142,7 @@ const likeUnlikePost = async (req, res) => {
       res.status(200).json({ message: "Post liked successfully" });
     }
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: err.message });
     console.log("Error liking/unliking post: ", err.message);
   }
 };
@@ -162,7 +162,7 @@ const replyToPost = async (req, res) => {
     // if the reply has no text
     if (!text) {
       // indicate failure in response
-      return res.status(400).json({ message: "Text field is required" });
+      return res.status(400).json({ error: "Text field is required" });
     }
 
     // grab the relevant post using the post ID
@@ -171,7 +171,7 @@ const replyToPost = async (req, res) => {
     // if no such post exists
     if (!post) {
       // indicate failure in response
-      return res.status(404).json({ message: "No such post found" });
+      return res.status(404).json({ error: "No such post found" });
     }
 
     // form the reply object as per definition in post schema
@@ -184,7 +184,7 @@ const replyToPost = async (req, res) => {
     // indicate success in response
     return res.status(200).json({ message: "Reply added successfully", post });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: err.message });
     console.log("Error replying to post: ", err.message);
   }
 };
@@ -199,7 +199,7 @@ const getFeedPosts = async (req, res) => {
     // if no such user exists
     if (!user) {
       // indicate failure in response
-      return res.status(404).json({ message: "No such user found" });
+      return res.status(404).json({ error: "No such user found" });
     }
 
     // grab the following list from user details
@@ -214,7 +214,7 @@ const getFeedPosts = async (req, res) => {
     // indicate success in response along with the feed posts
     return res.status(200).json({ feedPosts });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: err.message });
     console.log("Error getting feed posts: ", err.message);
   }
 };

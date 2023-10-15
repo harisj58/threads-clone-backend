@@ -77,7 +77,7 @@ const loginUser = async (req, res) => {
     // if user does not exist or if the password is not correct
     if (!user || !isPasswordCorrect) {
       // indicate log in failure in response
-      return res.status(400).json({ message: "Invalid username or password" });
+      return res.status(400).json({ error: "Invalid username or password" });
     }
 
     // generate a JWT token and send it to browser to store as a cookie
@@ -93,7 +93,7 @@ const loginUser = async (req, res) => {
   } catch (err) {
     // catch any errors that show up
     // indicate them in the response
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: err.message });
     // log them to the console
     console.log("Error logging in: ", err.message);
   }
@@ -109,7 +109,7 @@ const logoutUser = async (req, res) => {
   } catch (err) {
     // catch any errors that show up
     // indicate them in response
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: err.message });
     // log them to the console
     console.log("Error signing in: ", err.message);
   }
@@ -130,12 +130,12 @@ const followUnfollowUser = async (req, res) => {
       // indicate failure in response as this is not valid
       return res
         .status(400)
-        .json({ message: "You cannot follow/unfollow yourself!" });
+        .json({ error: "You cannot follow/unfollow yourself!" });
 
     // if either userToModify or the currentUser are null
     if (!userToModify || !currentUser)
       // indicate failure in response
-      return res.status(400).json({ message: "User to follow not found" });
+      return res.status(400).json({ error: "User to follow not found" });
 
     // check if the currentUser is already following userToModify
     const isFollowing = currentUser.following.includes(id);
@@ -166,7 +166,7 @@ const followUnfollowUser = async (req, res) => {
   } catch (err) {
     // catch any errors that show up
     // indicate them in response
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: err.message });
     // log them in the console
     console.log("Error following user: ", err.message);
   }
@@ -185,7 +185,7 @@ const updateUser = async (req, res) => {
     // if no such user is found
     if (!user) {
       // indicate failure in response
-      return res.status(400).json({ message: "User not found" });
+      return res.status(400).json({ error: "User not found" });
     }
 
     // Check if the account being modified belongs to the user signed in
@@ -193,7 +193,7 @@ const updateUser = async (req, res) => {
       // if not, forbid modification
       return res
         .status(400)
-        .json({ message: "You cannot update other's profile" });
+        .json({ error: "You cannot update other's profile" });
     }
 
     // if password is present in request body
@@ -221,7 +221,7 @@ const updateUser = async (req, res) => {
   } catch (err) {
     //catch any errors that show up
     // indicate them in response
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: err.message });
     // log them to console
     console.log("Error updating profile: ", err.message);
   }
@@ -242,7 +242,7 @@ const getUserProfile = async (req, res) => {
     // if no such user exists
     if (!user) {
       // indicate failure in response
-      return res.status(400).json({ message: "No such user found" });
+      return res.status(400).json({ error: "No such user found" });
     }
 
     // otherwise indicate success and send user details
@@ -250,7 +250,7 @@ const getUserProfile = async (req, res) => {
   } catch (err) {
     // catch any errors that show up
     // indicate them in response
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: err.message });
     // log them to the console
     console.log("Error getting profile: ", err.message);
   }
