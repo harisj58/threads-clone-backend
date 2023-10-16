@@ -1,6 +1,7 @@
 import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import generateTokenAndSetCookie from "../utils/helpers/generateTokenAndSetCookie.js";
+import { v2 as cloudinary } from "cloudinary";
 
 // asynchronous function to sign up the user
 const signupUser = async (req, res) => {
@@ -179,7 +180,9 @@ const followUnfollowUser = async (req, res) => {
 // asynchronous function to update user profile details
 const updateUser = async (req, res) => {
   // grab the following credentials from the request body
-  const { name, email, username, password, profilePic, bio } = req.body;
+  const { name, email, username, password, bio } = req.body;
+  // get profile pic (base64 string) as a variable from request body
+  let { profilePic } = req.body;
   // grab the userId of currently signed in user
   const userId = req.user._id;
 
@@ -191,6 +194,44 @@ const updateUser = async (req, res) => {
       // indicate failure in response
       return res.status(400).json({ error: "User not found" });
     }
+
+    // check if an updated username was sent
+    if (username) {
+      // get the details of a user with the same current username as one
+      // the current user wishes to set as
+      const userWithSameUsername = await User.findOne({ username: username });
+      // if such a user already exists and is not the one signed in currently
+      if (
+        userWithSameUsername &&
+        userWithSameUsername._id.toString() !== userId.toString()
+      ) {
+        // indicate failure in response
+        return res.status(400).json({
+          error:
+            "This username is already taken. Please choose a different username.",
+        });
+      }
+    }
+
+    // check if an updated email was sent
+    if (email) {
+      // get the details of a user with the same current email as one
+      // the current user wishes to set as
+      const userWithSameEmail = await User.findOne({ email: email });
+      // if such a user already exists and is not the one signed in currently
+      if (
+        userWithSameEmail &&
+        userWithSameEmail._id.toString() !== userId.toString()
+      ) {
+        // indicate failure in response
+        return res.status(400).json({
+          error: "This email is in use by another account.",
+        });
+      }
+    }
+
+    console.log(req.params.id);
+    console.log(userId.toString());
 
     // Check if the account being modified belongs to the user signed in
     if (req.params.id !== userId.toString()) {
@@ -210,6 +251,20 @@ const updateUser = async (req, res) => {
       user.password = hashedPassword;
     }
 
+    // if there is a profile pic from request body
+    if (profilePic) {
+      // delete existing profile pic first
+      if (user.profilePic) {
+        await cloudinary.uploader.destroy(
+          user.profilePic.split("/").pop().split(".")[0]
+        );
+      }
+      // get the response after uploading it to cloudinary
+      const uploadedResponse = await cloudinary.uploader.upload(profilePic);
+      // obtain the secure url generated upon uploading the pic
+      profilePic = uploadedResponse.secure_url;
+    }
+
     // update the rest of the properties if present in request body
     user.name = name || user.name;
     user.email = email || user.email;
@@ -221,7 +276,7 @@ const updateUser = async (req, res) => {
     user = await user.save();
 
     // indicate success in response
-    res.status(200).json({ message: "User updated successfully", user });
+    res.status(200).json(user);
   } catch (err) {
     //catch any errors that show up
     // indicate them in response
