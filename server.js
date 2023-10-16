@@ -24,7 +24,7 @@ cloudinary.config({
 });
 
 // To parse JSON data in the req.body
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
 // To parse form data in the req.body
 app.use(express.urlencoded({ extended: true }));
 // To parse and store cookies for session management
