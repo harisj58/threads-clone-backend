@@ -2,6 +2,7 @@ import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import generateTokenAndSetCookie from "../utils/helpers/generateTokenAndSetCookie.js";
 import { v2 as cloudinary } from "cloudinary";
+import mongoose from "mongoose";
 
 // asynchronous function to sign up the user
 const signupUser = async (req, res) => {
@@ -288,15 +289,25 @@ const updateUser = async (req, res) => {
 
 // asynchronous function to get the profile of a user
 const getUserProfile = async (req, res) => {
-  // get the username from request parameters
-  const { username } = req.params;
+  // get the query from request parameters
+  const { query } = req.params;
 
   try {
-    // find a user with the supplied username without the password and
-    // updatedAt fields
-    const user = await User.findOne({ username })
-      .select("-password")
-      .select("-updatedAt");
+    // declare a user variable
+    let user;
+
+    // check if the supplied parameter is a valid ObjectID using mongoose
+    if (mongoose.Types.ObjectId.isValid(query)) {
+      // if so, search using userId
+      user = await User.findOne({ _id: query })
+        .select("-password")
+        .select("-updatedAt");
+    } else {
+      // otherwise look for user using username
+      user = await User.findOne({ username: query })
+        .select("-password")
+        .select("-updatedAt");
+    }
 
     // if no such user exists
     if (!user) {
