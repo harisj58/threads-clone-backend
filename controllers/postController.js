@@ -207,6 +207,7 @@ const replyToPost = async (req, res) => {
     console.log("Error replying to post: ", err.message);
   }
 };
+
 // asynchronous function to get feed of a user
 const getFeedPosts = async (req, res) => {
   try {
@@ -238,6 +239,25 @@ const getFeedPosts = async (req, res) => {
   }
 };
 
+// asynchronous function to get posts from a specific username
+const getUserPosts = async (req, res) => {
+  const { username } = req.params;
+  try {
+    const user = await User.findOne({ username });
+
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const posts = await Post.find({ postedBy: user._id }).sort({
+      createdAt: -1,
+    });
+
+    return res.status(200).json(posts);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+    console.log("Error getting user posts: ", err.message);
+  }
+};
+
 export {
   createPost,
   getPost,
@@ -245,4 +265,5 @@ export {
   likeUnlikePost,
   replyToPost,
   getFeedPosts,
+  getUserPosts,
 };
