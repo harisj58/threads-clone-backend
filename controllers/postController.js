@@ -133,7 +133,7 @@ const deletePost = async (req, res) => {
 const likeUnlikePost = async (req, res) => {
   try {
     // get post ID from request parameters
-    const postId = req.params;
+    const { id: postId } = req.params;
     // get user ID from user object
     const userId = req.user._id;
 
@@ -156,7 +156,8 @@ const likeUnlikePost = async (req, res) => {
       res.status(200).json({ message: "Post unliked successfully" });
     } else {
       // Like post by pushing his user ID into post likes
-      await Post.updateOne({ _id: postId }, { $push: { likes: userId } });
+      post.likes.push(userId);
+      await post.save();
       res.status(200).json({ message: "Post liked successfully" });
     }
   } catch (err) {
