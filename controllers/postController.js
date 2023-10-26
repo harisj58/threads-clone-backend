@@ -1,11 +1,13 @@
 import Post from "../models/postModel.js";
 import User from "../models/userModel.js";
+import { v2 as cloudinary } from "cloudinary";
 
 // asynchronous function to create a post
 const createPost = async (req, res) => {
   try {
     // grab required info from request body
-    const { postedBy, text, img } = req.body;
+    const { postedBy, text } = req.body;
+    let { img } = req.body;
 
     // if the user posting or the text is missing
     if (!postedBy || !text) {
@@ -40,6 +42,14 @@ const createPost = async (req, res) => {
       return res
         .status(400)
         .json({ error: `Text must be less than ${maxLength} characters` });
+    }
+
+    // if user posts a thread with an image
+    if (img) {
+      // get the response after uploading it to cloudinary
+      const uploadedResponse = await cloudinary.uploader.upload(img);
+      // obtain the secure url generated upon uploading the pic
+      img = uploadedResponse.secure_url;
     }
 
     // create a new post using the details
@@ -98,6 +108,14 @@ const deletePost = async (req, res) => {
     if (post.postedBy.toString() !== req.user._id.toString()) {
       // indicate failure as a user may not delete someone else's post
       return res.status(400).json({ error: "Unauthorized to delete post" });
+    }
+
+    // if there was an image within that post
+    if (post.img) {
+      // delete it from cloudinary storage bucket
+      await cloudinary.uploader.destroy(
+        post.img.split("/").pop().split(".")[0]
+      );
     }
 
     // await deletion of post using post ID
@@ -212,7 +230,7 @@ const getFeedPosts = async (req, res) => {
     });
 
     // indicate success in response along with the feed posts
-    return res.status(200).json({ feedPosts });
+    return res.status(200).json(feedPosts);
   } catch (err) {
     res.status(500).json({ error: err.message });
     console.log("Error getting feed posts: ", err.message);
