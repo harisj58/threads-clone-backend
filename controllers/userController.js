@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import generateTokenAndSetCookie from "../utils/helpers/generateTokenAndSetCookie.js";
 import { v2 as cloudinary } from "cloudinary";
 import mongoose from "mongoose";
+import Post from "../models/postModel.js";
 
 // asynchronous function to sign up the user
 const signupUser = async (req, res) => {
@@ -275,6 +276,19 @@ const updateUser = async (req, res) => {
 
     // await updation of user details in database
     user = await user.save();
+
+    // Find all posts that the user replied to and update username and profile
+    // pic
+    await Post.updateMany(
+      { "replies.userId": userId },
+      {
+        $set: {
+          "replies.$[reply].username": user.username,
+          "replies.$[reply].userProfilePic": user.profilePic,
+        },
+      },
+      { arrayFilters: [{ "reply.userId": userId }] }
+    );
 
     // indicate success in response
     res.status(200).json(user);
